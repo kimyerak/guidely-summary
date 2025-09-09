@@ -1,0 +1,45 @@
+# 빌드 결과물
+build/
+target/
+*.jar
+*.war
+
+# IDE 관련 파일
+.idea/
+.vscode/
+*.iml
+*.ipr
+*.iws
+
+# OS 관련 파일
+.DS_Store
+Thumbs.db
+
+# Git 관련
+.git/
+.gitignore
+
+# Gradle 관련
+.gradle/
+gradle-app.setting
+
+# 로그 파일
+*.log
+logs/
+
+# 임시 파일
+*.tmp
+*.temp
+
+# 테스트 결과
+test-results/
+**/test-results/
+
+# Docker 관련
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# 기타
+README.md
+*.md 

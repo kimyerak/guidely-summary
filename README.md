@@ -212,12 +212,65 @@ spring:
 ## HTTP 테스트
 `testHttp/summary-statistics.http` 파일을 사용하여 API를 테스트할 수 있습니다.
 
-## 배포
+## Docker 배포
+
+### Docker Hub 레포지토리
+- **Docker Hub**: https://hub.docker.com/repository/docker/yerak213/summary-statistics
+
+### Docker 이미지 빌드 및 실행
+```bash
+# Docker 이미지 빌드
+docker build -t yerak213/summary-statistics:latest .
+
+# Docker 컨테이너 실행
+docker run -p 8080:8080 yerak213/summary-statistics:latest
+
+# 또는 Docker Hub에서 이미지 pull 후 실행
+docker pull yerak213/summary-statistics:latest
+docker run -p 8080:8080 yerak213/summary-statistics:latest
+```
+
+### Docker Compose 사용 (권장)
+프로젝트 루트에 `docker-compose.yml` 파일이 포함되어 있습니다.
+
+```bash
+# Docker Compose로 전체 스택 실행 (MySQL 포함)
+docker-compose up -d
+
+# 로그 확인
+docker-compose logs -f summary-statistics
+
+# 서비스 중지
+docker-compose down
+
+# 볼륨까지 삭제 (데이터베이스 데이터 포함)
+docker-compose down -v
+```
+
+### 프로덕션 환경 배포
+```bash
+# 프로덕션용 이미지 빌드 및 푸시
+docker build -t yerak213/summary-statistics:v1.0.0 .
+docker push yerak213/summary-statistics:v1.0.0
+
+# 프로덕션 환경에서 실행
+docker run -d \
+  --name summary-statistics \
+  -p 8080:8080 \
+  -e SPRING_PROFILES_ACTIVE=prod \
+  -e SPRING_DATASOURCE_URL=jdbc:mysql://your-mysql-host:3306/summary_statistics \
+  -e SPRING_DATASOURCE_USERNAME=your-username \
+  -e SPRING_DATASOURCE_PASSWORD=your-password \
+  yerak213/summary-statistics:v1.0.0
+```
+
+## 로컬 배포
 ```bash
 # JAR 파일 생성
 ./gradlew build
 
 # 생성된 JAR 파일은 build/libs/ 디렉토리에 위치
+java -jar build/libs/demo-0.0.1-SNAPSHOT.jar
 ```
 
 ## 라이센스

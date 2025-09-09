@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  summary-statistics:
+    build: .
+    image: yerak213/summary-statistics:latest
+    container_name: summary-statistics-app
+    ports:
+      - "8080:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - SPRING_DATASOURCE_URL=jdbc:mysql://mysql:3306/summary_statistics
+      - SPRING_DATASOURCE_USERNAME=root
+      - SPRING_DATASOURCE_PASSWORD=password123
+      - SPRING_JPA_HIBERNATE_DDL_AUTO=update
+      - SPRING_JPA_SHOW_SQL=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - summary-statistics-network
+
+  mysql:
+    image: mysql:8.0
+    container_name: summary-statistics-mysql
+    environment:
+      - MYSQL_ROOT_PASSWORD=password123
+      - MYSQL_DATABASE=summary_statistics
+      - MYSQL_CHARACTER_SET_SERVER=utf8mb4
+      - MYSQL_COLLATION_SERVER=utf8mb4_unicode_ci
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 20s
+      retries: 10
+    networks:
+      - summary-statistics-network
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  summary-statistics-network:
+    driver: bridge 
