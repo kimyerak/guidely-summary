@@ -1,0 +1,51 @@
+### 1. EndingCredits 생성 - RAG에서 받은 요약 저장 (전체 빈도 자동 재계산)
+POST http://localhost:8080/api/v1/summary-statistics/ending-credits
+Content-Type: application/json
+
+{
+  "conversationId": 123,
+  "contents": [
+    "케이팝 데몬헌터스의 폭발적인 인기에 이끌려 국립중앙박물관을 찾았다",
+    "조선시대 민화부터 현대 작품까지 다양한 호랑이 작품들이 전시되어 있었다",
+    "김홍도의 호랑이 그림이 특히 인상적이었다",
+    "데몬헌터스 캐릭터들의 호랑이 모티브를 발견할 수 있었다",
+    "박물관 도슨트의 호랑이 상징성 설명이 흥미로웠다",
+    "용맹과 권위의 상징이면서 해학과 친근함을 나타내기도 한다",
+    "뮤직비디오 속 호랑이 장면들의 현대적 재해석을 느꼈다",
+    "전시 관람 후 카페에서 호랑이 모양 쿠키를 먹었다",
+    "기념품으로 호랑이 엽서를 구매했다",
+    "전통과 현대가 만나는 지점이 정말 흥미로웠다"
+  ]
+}
+
+### 2. EndingCredits 생성 - 다른 대화 예시
+POST http://localhost:8080/api/v1/summary-statistics/ending-credits
+Content-Type: application/json
+
+{
+  "conversationId": 456,
+  "contents": [
+    "친구들과 함께 간 호랑이 전시 관람이 의미있었다",
+    "데몬헌터스 팬들이 생각보다 많이 와서 놀랐다",
+    "모두 호랑이 작품 앞에서 인증샷을 찍고 있었다",
+    "박물관 측의 케이팝과 전통문화 융합에 대한 긍정적 시각",
+    "용 전시나 봉황 전시도 기대해본다"
+  ]
+}
+
+###
+
+### 3. EndingCredits 조회 (특정 대화)
+GET http://localhost:8080/api/v1/summary-statistics/conversations/123
+
+###
+
+### 4. 전체 단어 빈도 조회 (Word Cloud용) ⭐ 메인 API
+GET http://localhost:8080/api/v1/summary-statistics/word-frequency
+
+###
+
+### 5. Health Check
+GET http://localhost:8080/actuator/health
+
+### 
