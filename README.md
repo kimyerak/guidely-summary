@@ -1,7 +1,8 @@
-# Demo Spring Boot Project
+# Summary Statistics API
 
 ## 프로젝트 개요
-Spring Boot 3.5.5 기반의 웹 애플리케이션 프로젝트입니다.
+RAG 서비스에서 생성된 요약 데이터를 저장하고 분석하는 Spring Boot 3.5.5 기반의 REST API 서비스입니다.
+텍스트 요약 데이터를 통계적으로 분석하고 워드 클라우드 생성을 위한 단어 빈도 데이터를 제공합니다.
 
 ## 기술 스택
 - **Java**: 17
@@ -13,25 +14,128 @@ Spring Boot 3.5.5 기반의 웹 애플리케이션 프로젝트입니다.
 - **ORM**: Spring Data JPA
 - **Monitoring**: Spring Boot Actuator
 - **Utility**: Lombok
+- **HTTP Client**: Spring WebFlux WebClient
 
 ## 프로젝트 구조
 ```
-demo/
+summary-statistics/
 ├── src/
 │   ├── main/
 │   │   ├── java/
 │   │   │   └── com/example/demo/
-│   │   │       └── DemoApplication.java
+│   │   │       ├── DemoApplication.java
+│   │   │       ├── SummaryStatisticsController.java
+│   │   │       ├── client/
+│   │   │       │   └── RagServiceClient.java
+│   │   │       ├── config/
+│   │   │       │   ├── DataInitializer.java
+│   │   │       │   └── WebClientConfig.java
+│   │   │       ├── domain/
+│   │   │       │   ├── entity/
+│   │   │       │   │   ├── EndingCredit.java
+│   │   │       │   │   └── WordFrequency.java
+│   │   │       │   └── repository/
+│   │   │       │       ├── EndingCreditRepository.java
+│   │   │       │       └── WordFrequencyRepository.java
+│   │   │       ├── dto/
+│   │   │       │   ├── EndingCreditRequest.java
+│   │   │       │   ├── EndingCreditResponse.java
+│   │   │       │   ├── ErrorResponse.java
+│   │   │       │   ├── RagSummaryResponse.java
+│   │   │       │   ├── WordCloudResponse.java
+│   │   │       │   └── WordFrequencyResponse.java
+│   │   │       ├── exception/
+│   │   │       │   ├── DuplicateShippingException.java
+│   │   │       │   ├── EndingCreditNotFoundException.java
+│   │   │       │   ├── ShippingNotFoundException.java
+│   │   │       │   └── ValidationException.java
+│   │   │       └── service/
+│   │   │           └── SummaryStatisticsService.java
 │   │   └── resources/
-│   │       ├── application.properties
+│   │       ├── application.yml
 │   │       ├── static/
 │   │       └── templates/
 │   └── test/
 │       └── java/
+├── testHttp/
+│   └── summary-statistics.http
 ├── build.gradle
 ├── gradlew
 ├── gradlew.bat
 └── settings.gradle
+```
+
+## API 엔드포인트
+
+### 1. EndingCredits 생성
+RAG 서비스에서 받은 여러 요약을 개별 레코드로 저장합니다.
+
+```http
+POST /api/v1/summary-statistics/ending-credits
+Content-Type: application/json
+
+{
+  "conversationId": 1,
+  "summaries": ["요약1", "요약2", "요약3"]
+}
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "conversationId": 1,
+    "summary": "요약1",
+    "createdAt": "2024-01-01T12:00:00"
+  },
+  {
+    "id": 2,
+    "conversationId": 1,
+    "summary": "요약2",
+    "createdAt": "2024-01-01T12:00:01"
+  }
+]
+```
+
+### 2. Conversation별 EndingCredits 조회
+특정 대화 ID로 저장된 요약 데이터를 조회합니다.
+
+```http
+GET /api/v1/summary-statistics/conversations/{conversationId}
+```
+
+**Response:**
+```json
+[
+  {
+    "id": 1,
+    "conversationId": 1,
+    "summary": "요약 내용",
+    "createdAt": "2024-01-01T12:00:00"
+  }
+]
+```
+
+### 3. 전체 단어 빈도 조회 (Word Cloud용)
+워드 클라우드 생성을 위한 전체 단어 빈도 데이터를 제공합니다.
+
+```http
+GET /api/v1/summary-statistics/word-frequency
+```
+
+**Response:**
+```json
+[
+  {
+    "word": "AI",
+    "frequency": 150
+  },
+  {
+    "word": "데이터",
+    "frequency": 120
+  }
+]
 ```
 
 ## 시작하기
@@ -43,7 +147,7 @@ demo/
 ### 프로젝트 실행
 ```bash
 # 프로젝트 디렉토리로 이동
-cd demo
+cd summary-statistics
 
 # Gradle Wrapper를 사용하여 애플리케이션 실행
 ./gradlew bootRun
@@ -63,47 +167,37 @@ java -jar build/libs/demo-0.0.1-SNAPSHOT.jar
 
 ## 애플리케이션 접속
 - **메인 애플리케이션**: http://localhost:8080
+- **API 베이스 URL**: http://localhost:8080/api/v1/summary-statistics
 - **Actuator 엔드포인트**: http://localhost:8080/actuator
 - **H2 콘솔**: http://localhost:8080/h2-console
 
 ## 주요 기능
-- Spring Web (REST API 개발)
-- Spring Data JPA (데이터베이스 연동)
-- Spring Boot Actuator (모니터링)
-- H2 Database (인메모리 데이터베이스)
-- MySQL Driver (MySQL 데이터베이스 연동)
-- Lombok (코드 간결화)
+- **텍스트 요약 저장**: RAG 서비스에서 생성된 요약 데이터를 체계적으로 저장
+- **대화별 요약 관리**: Conversation ID 기반으로 요약 데이터 그룹화 및 조회
+- **단어 빈도 분석**: 저장된 요약 데이터에서 단어 빈도 계산 및 제공
+- **워드 클라우드 지원**: 시각화를 위한 단어 빈도 데이터 API 제공
+- **RESTful API**: 표준 REST API 설계 원칙 준수
+- **CORS 지원**: 웹 애플리케이션에서의 크로스 오리진 요청 허용
 
-## 개발 가이드
+## 데이터베이스 설정
+`application.yml` 파일에서 데이터베이스 설정을 변경할 수 있습니다:
 
-### 패키지 구조
-현재 기본 패키지 구조만 생성되어 있습니다. 필요에 따라 다음과 같은 계층 구조를 추가할 수 있습니다:
-
-```
-com.example.demo/
-├── controller/     # REST API 컨트롤러
-├── service/        # 비즈니스 로직
-├── repository/     # 데이터 접근 계층
-├── entity/         # JPA 엔티티
-├── dto/           # 데이터 전송 객체
-└── config/        # 설정 클래스
-```
-
-### 데이터베이스 설정
-`application.properties` 파일에서 데이터베이스 설정을 변경할 수 있습니다:
-
-```properties
+```yaml
 # H2 Database (개발용)
-spring.datasource.url=jdbc:h2:mem:testdb
-spring.datasource.driverClassName=org.h2.Driver
-spring.datasource.username=sa
-spring.datasource.password=
+spring:
+  datasource:
+    url: jdbc:h2:mem:testdb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
 
 # MySQL (운영용)
-# spring.datasource.url=jdbc:mysql://localhost:3306/demo
-# spring.datasource.username=root
-# spring.datasource.password=password
-# spring.datasource.driver-class-name=com.mysql.cj.jdbc.Driver
+# spring:
+#   datasource:
+#     url: jdbc:mysql://localhost:3306/summary_statistics
+#     username: root
+#     password: password
+#     driver-class-name: com.mysql.cj.jdbc.Driver
 ```
 
 ## 테스트
@@ -114,6 +208,9 @@ spring.datasource.password=
 # 테스트 커버리지 확인
 ./gradlew test jacocoTestReport
 ```
+
+## HTTP 테스트
+`testHttp/summary-statistics.http` 파일을 사용하여 API를 테스트할 수 있습니다.
 
 ## 배포
 ```bash
