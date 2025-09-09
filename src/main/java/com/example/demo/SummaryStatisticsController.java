@@ -4,6 +4,7 @@ import com.example.demo.dto.EndingCreditRequest;
 import com.example.demo.dto.EndingCreditResponse;
 import com.example.demo.dto.WordCloudResponse;
 import com.example.demo.service.SummaryStatisticsService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

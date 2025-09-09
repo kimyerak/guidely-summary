@@ -100,32 +100,65 @@ public class SummaryStatisticsService {
      */
     @Transactional
     public void recalculateAllWordFrequency() {
-        // 기존 단어 빈도 데이터 모두 삭제
-        wordFrequencyRepository.deleteAll();
-        
-        // 모든 EndingCredit의 content를 가져와서 합치기
-        List<EndingCredit> allCredits = endingCreditRepository.findAll();
-        
-        if (allCredits.isEmpty()) {
-            return;
+        try {
+            // 기존 단어 빈도 데이터 모두 삭제하고 즉시 커밋
+            wordFrequencyRepository.deleteAll();
+            wordFrequencyRepository.flush();
+            
+            // 모든 EndingCredit의 content를 가져와서 합치기
+            List<EndingCredit> allCredits = endingCreditRepository.findAll();
+            
+            if (allCredits.isEmpty()) {
+                return;
+            }
+            
+            String combinedContent = allCredits.stream()
+                    .map(EndingCredit::getContent)
+                    .filter(content -> content != null && !content.trim().isEmpty())
+                    .collect(Collectors.joining(" "));
+            
+            if (combinedContent.trim().isEmpty()) {
+                return;
+            }
+            
+            Map<String, Integer> wordCount = analyzeWordFrequency(combinedContent);
+
+            // WordFrequency 엔티티로 변환 및 저장
+            if (!wordCount.isEmpty()) {
+                // 기존 데이터와 중복되지 않도록 확인 후 저장
+                for (Map.Entry<String, Integer> entry : wordCount.entrySet()) {
+                    String word = entry.getKey();
+                    Integer frequency = entry.getValue();
+                    
+                    // 중복 체크 후 저장 또는 업데이트
+                    WordFrequency existingWord = wordFrequencyRepository.findByWord(word).orElse(null);
+                    
+                    if (existingWord != null) {
+                        // 기존 단어가 있으면 빈도수 업데이트
+                        existingWord = WordFrequency.builder()
+                                .id(existingWord.getId())
+                                .word(word)
+                                .frequency(frequency)
+                                .createdAt(existingWord.getCreatedAt())
+                                .build();
+                        wordFrequencyRepository.save(existingWord);
+                    } else {
+                        // 새로운 단어면 생성
+                        WordFrequency newWord = WordFrequency.builder()
+                                .word(word)
+                                .frequency(frequency)
+                                .createdAt(LocalDateTime.now())
+                                .build();
+                        wordFrequencyRepository.save(newWord);
+                    }
+                }
+            }
+        } catch (Exception e) {
+            // 로그 출력 후 예외 전파
+            System.err.println("단어 빈도 재계산 중 오류 발생: " + e.getMessage());
+            e.printStackTrace();
+            throw new RuntimeException("단어 빈도 재계산 실패", e);
         }
-        
-        String combinedContent = allCredits.stream()
-                .map(EndingCredit::getContent)
-                .collect(Collectors.joining(" "));
-        
-        Map<String, Integer> wordCount = analyzeWordFrequency(combinedContent);
-
-        // WordFrequency 엔티티로 변환 및 저장
-        List<WordFrequency> wordFrequencies = wordCount.entrySet().stream()
-                .map(entry -> WordFrequency.builder()
-                        .word(entry.getKey())
-                        .frequency(entry.getValue())
-                        .createdAt(LocalDateTime.now())
-                        .build())
-                .collect(Collectors.toList());
-
-        wordFrequencyRepository.saveAll(wordFrequencies);
     }
 
     /**

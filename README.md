@@ -166,10 +166,20 @@ java -jar build/libs/demo-0.0.1-SNAPSHOT.jar
 ```
 
 ## 애플리케이션 접속
+
+### 프로덕션 환경
+- **메인 애플리케이션**: https://guidely-summary-statistic-dtfac0dde5a0bmea.koreacentral-01.azurewebsites.net/
+- **API 베이스 URL**: https://guidely-summary-statistic-dtfac0dde5a0bmea.koreacentral-01.azurewebsites.net/api/v1/summary-statistics
+- **Swagger UI**: https://guidely-summary-statistic-dtfac0dde5a0bmea.koreacentral-01.azurewebsites.net/swagger-ui.html
+- **API 문서 (JSON)**: https://guidely-summary-statistic-dtfac0dde5a0bmea.koreacentral-01.azurewebsites.net/api-docs
+- **Actuator 엔드포인트**: https://guidely-summary-statistic-dtfac0dde5a0bmea.koreacentral-01.azurewebsites.net/actuator
+
+### 로컬 개발 환경
 - **메인 애플리케이션**: http://localhost:8080
 - **API 베이스 URL**: http://localhost:8080/api/v1/summary-statistics
+- **Swagger UI**: http://localhost:8080/swagger-ui.html
+- **API 문서 (JSON)**: http://localhost:8080/api-docs
 - **Actuator 엔드포인트**: http://localhost:8080/actuator
-- **H2 콘솔**: http://localhost:8080/h2-console
 
 ## 주요 기능
 - **텍스트 요약 저장**: RAG 서비스에서 생성된 요약 데이터를 체계적으로 저장
