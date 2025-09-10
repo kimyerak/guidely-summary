@@ -2,14 +2,14 @@ spring:
   application:
     name: demo
     
-  # Azure MySQL 데이터베이스 설정
+  # Azure MySQL 데이터베이스 설정정
   datasource:
-    url: jdbc:mysql://db-guidely-summary-statstics.mysql.database.azure.com:3306/summary-statistics?useSSL=true&requireSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Seoul
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: appsummarystat
-    password: AppSummaryPass#123
+    url: ${SPRING_DATASOURCE_URL}
+    driver-class-name: ${SPRING_DATASOURCE_DRIVER_CLASS_NAME}
+    username: ${SPRING_DATASOURCE_USERNAME}
+    password: ${SPRING_DATASOURCE_PASSWORD}
     
-    # MySQL 연결 설정
+    # MySQL 연결설정
     hikari:
       maximum-pool-size: 10
       minimum-idle: 2
@@ -17,7 +17,7 @@ spring:
       idle-timeout: 300000
       max-lifetime: 1200000
 
-  # JPA 설정 (MySQL 용)
+  # # JPA 설정 (MySQL 용)
   jpa:
     database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
@@ -30,6 +30,8 @@ spring:
           batch_size: 100
         order_inserts: true
         order_updates: true
+
+
         
 
 
