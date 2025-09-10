@@ -28,10 +28,19 @@ public class SummaryStatisticsService {
     // 한국어 및 영어 단어 패턴
     private static final Pattern WORD_PATTERN = Pattern.compile("^[가-힣a-zA-Z]{2,}$");
     
-    // 불용어 목록 (간단한 예시)
+    // 불용어 목록 (한국어 조사/어미/접속사 등 포함)
     private static final Set<String> STOP_WORDS = Set.of(
-        "이", "그", "저", "것", "수", "등", "및", "또는", "하지만", "그러나", "따라서",
-        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with"
+        // 한국어 불용어
+        "이", "그", "저", "것", "수", "등", "및", "또는", "그러나",
+        "있다", "되고", "하고", "에서", "으로", "로", "를", "을", "가", "은", "는",
+        "의", "에", "와", "과", "도", "만", "부터", "까지", "에게", "한테", "께", "보다",
+        "처럼", "같이", "마다", "마저", "조차", "뿐", "밖에", "대해", "위해", "통해",
+        "있는", "없는", "하는", "되는", "된", "할", "될", "한", "하다", "되다", "이다",
+        "있었다", "없었다", "했다", "됐다", "였다", "이었다", "갔다", "왔다", "봤다", "했습니다", "됐습니다",
+        "그리고", "또한", "그런데", "하지만", "그래서", "따라서", "그러므로", "즉",
+        // 영어 불용어
+        "the", "a", "an", "and", "or", "but", "in", "on", "at", "to", "for", "of", "with",
+        "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "do", "does", "did"
     );
 
     /**
@@ -85,12 +94,13 @@ public class SummaryStatisticsService {
     }
 
     /**
-     * 전체 단어 빈도 조회 (Word Cloud용)
+     * 전체 단어 빈도 조회 (Word Cloud용) - Top 50개만 반환
      */
     public List<WordCloudResponse> getAllWordFrequency() {
         List<WordFrequency> wordFrequencies = wordFrequencyRepository.findAllByOrderByFrequencyDesc();
         
         return wordFrequencies.stream()
+                .limit(50)  // Top 50개만 제한
                 .map(wf -> WordCloudResponse.of(wf.getWord(), wf.getFrequency()))
                 .collect(Collectors.toList());
     }
